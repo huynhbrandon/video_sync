@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+
+    
+	<title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; background: #222 }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+	
+  </head>
+  
+  <!-- load iframe -->
+<iframe id="existing-iframe-example"
+        width="640" height="360"
+        src="https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1"
+        frameborder="0"
+        style="border: solid 4px #37474F"
+
+></iframe>
+
+	<script src="/socket.io/socket.io.js"></script>	<!-- load socket.io-client -->
+	
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+	<script type="text/javascript">
+  var tag = document.createElement('script');
+  tag.id = 'iframe-demo';
+  tag.src = 'https://www.youtube.com/iframe_api';
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('existing-iframe-example', {
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+    });
+  }
+  
+  function onPlayerReady(event) {
+    document.getElementById('existing-iframe-example').style.borderColor = '#FF6D00';
+	event.target.playVideo();
+  }
+  
+  function changeBorderColor(playerStatus) {
+    var color;
+    if (playerStatus == -1) {
+      color = "#37474F"; // unstarted = gray
+    } else if (playerStatus == 0) {
+      color = "#FFFF00"; // ended = yellow
+    } else if (playerStatus == 1) {
+      color = "#33691E"; // playing = green
+    } else if (playerStatus == 2) {
+      color = "#DD2C00"; // paused = red
+    } else if (playerStatus == 3) {
+      color = "#AA00FF"; // buffering = purple
+    } else if (playerStatus == 5) {
+      color = "#FF6DOO"; // video cued = orange
+    }
+    if (color) {
+      document.getElementById('existing-iframe-example').style.borderColor = color;
+    }
+  }
+  function onPlayerStateChange(event) {
+    changeBorderColor(event.data);
+	//if(player.getPlayerState() == 1) {
+//		console.log('video is playing'); //playing
+//	}
+  }
+  
+  $(document).ready(function() {
+  
+	var socket = io();
+	// changing state
+	//console.log(player.getPlayerState());
+	//	socket.emit('playing state');
+	console.log('video is ready');
+	
+	
+	
+	
+
+
+
+	
+	});
+	
+	
+
+  
+
+</script>
+  
+  <body>
+  <p><button id = "b">Pause</button></p>
+  <p><button id = "c">Play</button></p>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+	<script src="/socket.io/socket.io.js"></script>	<!-- load socket.io-client -->
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+		$(function () { // wait until things are done loading to do stuff
+			var clicked = 'clicked';
+			var socket = io(); // new instance serve wiring up node and socket
+			$('form').submit(function(){ // when selector with form is submitted
+				socket.emit('chat message', $('#m').val()); 
+				$('#m').val('');
+				return false;
+			});
+			socket.on('chat message', function(msg){ // got from io.emit()
+				$('#messages').append($('<li>').text(msg));
+			});
+			
+			
+			// pause all vids
+			
+			$('#b').click(function(){
+				socket.emit('paused');
+				});
+			
+			socket.on('paused', function(){
+				player.pauseVideo();
+				console.log('paused');
+				});
+				
+			// play all videos
+			$('#c').click(function(){
+				socket.emit('play');
+				});
+			
+			socket.on('play', function(){
+				player.playVideo();
+				console.log('playing');
+				});	
+			
+			
+			
+			
+		});
+		
+	</script>
+  </body>
+</html>
