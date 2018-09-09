@@ -1,3 +1,6 @@
-iframe{
-	margin-left: 500px;
+iframe	{
+	height: 480px;
+	width: 720px;
+	margin: 0 auto;
+	display: block;
 }

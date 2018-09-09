@@ -1,28 +1,16 @@
 <!doctype html>
 <html>
+<head>
 
-    
+
 	<title>Socket.IO chat</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; background: #222 }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style>
-	
-  </head>
+
+	<link rel="stylesheet" type="text/css" href="styles.css">
+ </head>
   
   <!-- load iframe -->
 <iframe id="existing-iframe-example"
-        width="640" height="360"
         src="https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1"
-        frameborder="0"
-        style="border: solid 4px #37474F"
-
 ></iframe>
 
 	<script src="/socket.io/socket.io.js"></script>	<!-- load socket.io-client -->
@@ -31,67 +19,25 @@
 
   
   <body>
+  
   <p><button id = "b">Pause</button></p>
   <p><button id = "c">Play</button></p>
   <p><button id = "d">Sync</button></p>
+  <p><form id = "vidID" action = "">
+		<input id = "videoId" autocomplete = "off" />
+			<button>Load</button>
+	</form>
+	</p>
+	
+  
+  
+  
     <ul id="messages"></ul>
-    <form action="">
+    <form id="msg" action = "">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
-	<script src="/socket.io/socket.io.js"></script>	<!-- load socket.io-client -->
-	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-	<script>
-		$(function () { // wait until things are done loading to do stuff
-			var clicked = 'clicked';
-			var socket = io(); // new instance serve wiring up node and socket
-			$('form').submit(function(){ // when selector with form is submitted
-				socket.emit('chat message', $('#m').val()); 
-				$('#m').val('');
-				return false;
-			});
-			socket.on('chat message', function(msg){ // got from io.emit()
-				$('#messages').append($('<li>').text(msg));
-			});
-			
-			
-			// pause all vids
-			
-			$('#b').click(function(){
-				socket.emit('paused');
-				});
-			
-			socket.on('paused', function(){
-				player.pauseVideo();
-				console.log('paused');
-				});
-				
-			// play all videos
-			$('#c').click(function(){
-				socket.emit('play');
-				});
-			
-			socket.on('play', function(){
-				player.playVideo();
-				console.log('playing');
-				});	
-			
-			//sync videos
-/*			$('#d').click(function(){
-			//
-				socket.emit('sync');
-				});
-				
-			socket.on('sync', function(){
-				console.log('syncing');
-				
-			});
-*/			
-			
-			
-		});
-		
-	</script>
-<script type="text/javascript">
+	
+	<script type="text/javascript">
   var tag = document.createElement('script');
   tag.id = 'iframe-demo';
   tag.src = 'https://www.youtube.com/iframe_api';
@@ -99,6 +45,7 @@
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
   var player;
+  
   function onYouTubeIframeAPIReady() {
     player = new YT.Player('existing-iframe-example', {
         events: {
@@ -148,6 +95,7 @@
   
   var socket = io();
   function onPlayerStateChange(event) {
+	
     changeBorderColor(event.data);
 	if(event.data == 1) {
 		console.log('video is playing'); //playing
@@ -155,12 +103,16 @@
 	} else if(event.data == 2){
 		socket.emit('paused');
   };
+	
+	
   }
+  
   
   // sync
   $('#d').click(function() {
-			var currentTime = player.getCurrentTime();
-			console.log(currentTime);
+			
+		var currentTime = player.getCurrentTime();
+		console.log(currentTime);
 		socket.emit('sync', currentTime);
 	});
 				
@@ -168,23 +120,94 @@
 			player.seekTo(currentTime);
 			console.log(currentTime);
 		});
-			
+	/*
+	$('#load').click(function(){
+		socket.emit('load');
+		});
 		
+		socket.on('load', function(){
+			player.cueVideoById("njmCUJ94lUM", 5, "large");
+		});
+	*/	
   
-  $(document).ready(function() {
-  
-	//var socket = io();
-	// changing state
-	//console.log(player.getPlayerState());
-	//	socket.emit('playing state');
-	console.log('video is ready');
-	});
 	
 	
 
   
 
 </script>
+	
+	<script src="/socket.io/socket.io.js"></script>	<!-- load socket.io-client -->
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+		$(function () { // wait until things are done loading to do stuff
+			var clicked = 'clicked';
+			var socket = io(); // new instance serve wiring up node and socket
+			
+			$('#msg').submit(function(){ // when selector with form is submitted
+
+				socket.emit('chat message', $('#m').val()); 
+				$('#m').val('');
+				return false;
+			});
+			socket.on('chat message', function(msg){ // got from io.emit()
+				$('#messages').append($('<li>').text(msg));
+				
+			});
+			
+			// get video ID
+			$('#vidID').submit(function(){
+				socket.emit('video id', $('#videoId').val());
+				$('videoId').val('');
+				return false;
+			});
+			socket.on('video id', function(vid){
+				console.log(vid);
+				player.cueVideoById(vid, 5, "large");
+			});
+			
+			
+			// pause all vids
+			
+			$('#b').click(function(){
+				var currentTime = player.getCurrentTime();
+				socket.emit('paused', currentTime);
+				console.log('pressing pause');
+				});
+			
+			socket.on('paused', function(){
+				player.pauseVideo();
+				console.log('paused');
+				});
+				
+			// play all videos
+			$('#c').click(function(){
+				socket.emit('play');
+				});
+			
+			socket.on('play', function(){
+				player.playVideo();
+				console.log('playing');
+				});	
+			
+			//sync videos
+/*			$('#d').click(function(){
+			//
+				socket.emit('sync');
+				});
+				
+			socket.on('sync', function(){
+				console.log('syncing');
+				
+			});
+*/			
+			
+			
+		});
+		
+	</script>
+	
+
 	
   </body>
 </html>
