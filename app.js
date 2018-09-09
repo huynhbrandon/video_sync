@@ -38,6 +38,12 @@ io.on('connection', function(socket){
 		console.log('a user disconnected')
 	}); 
 	
+	// react to synch
+	socket.on('sync', function(currentTime){
+		console.log(currentTime);
+		io.emit('sync', currentTime);
+	});
+	
 	// status change reaction
 	socket.on('playing state', function() {
 		console.log('vid is playing');
