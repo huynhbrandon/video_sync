@@ -2,7 +2,8 @@
 
 Watch a video with someone miles away in real time!
 
-#Disclaimer
+# Disclaimer
+
 As of right now, only one room is available for this app so if users have already occupied the space to watch videos, you will have to wait. Working on implementing more rooms.
 
 How to use:
