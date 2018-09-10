@@ -47,7 +47,7 @@ io.on('connection', function(socket){
 		console.log('a user disconnected')
 	}); 
 	
-	// react to synch
+	// react to sync
 	socket.on('sync', function(currentTime){
 		console.log('sync or pause sync');
 		io.emit('sync', currentTime);
