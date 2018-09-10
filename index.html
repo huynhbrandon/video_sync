@@ -4,29 +4,32 @@
 
 
 	<title>Socket.IO chat</title>
-
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="styles.css">
  </head>
-  
-  <!-- load iframe -->
-<iframe id="existing-iframe-example"
-        src="https://www.youtube.com/embed/M7lc1UVf-VE?enablejsapi=1"
-></iframe>
 
-	<script src="/socket.io/socket.io.js"></script>	<!-- load socket.io-client -->
-	
-	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-
-  
   <body>
   
-  <p><button id = "b">Pause</button></p>
-  <p><button id = "c">Play</button></p>
-  <p><button id = "d">Sync</button></p>
-  <p><form id = "vidID" action = "">
-		<input id = "videoId" autocomplete = "off" />
+    <!-- load iframe -->
+		<iframe id="existing-iframe-example"
+
+				src="https://www.youtube.com/embed/kkFFq11j6dQ?enablejsapi=1"
+			
+		>
+		</iframe>
+		  <p>
+			<button id = "c">Play</button>
+			<button id = "b">Pause</button>
+			<button id = "d">Sync</button>
+		  </p>
+
+  
+  
+  <p>
+	<form id = "vidID" action = "">
+		<input id = "videoId" autocomplete = "off" placeholder = "Enter video ID"/>
 			<button>Load</button>
-	</form>
+		</form>
 	</p>
 	
   
@@ -37,7 +40,11 @@
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
 	
-	<script type="text/javascript">
+	<script src="/socket.io/socket.io.js"></script>	<!-- load socket.io-client -->
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	
+			
+<script>
   var tag = document.createElement('script');
   tag.id = 'iframe-demo';
   tag.src = 'https://www.youtube.com/iframe_api';
@@ -56,10 +63,9 @@
     });
 	player.addEventListener('onStateChange', updateBar);
   }
- // player.addEventListener('onStateChange', updateBar);
   
   function updateBar(event){
-	if(event.data == 2) {
+	if(event.data == 2) { // paused
 		console.log(player.getCurrentTime());
 	}
 	
@@ -68,10 +74,19 @@
 
   
   function onPlayerReady(event) {
+	console.log(player.getPlayerState());
+	event.target.playVideo();	// no autoplay on chrome?
     document.getElementById('existing-iframe-example').style.borderColor = '#FF6D00';
-	event.target.playVideo();
-  }
+	//event.target.playVideo(); // event.target references target that dispatched the event
+	//$(document).ready(function(event){
+	//	if(event.data == -1){
+	//		event.target.playVideo();
+	}
   
+  
+  
+  
+  //change video border based on player state
   
   function changeBorderColor(playerStatus) {
     var color;
@@ -94,55 +109,32 @@
   }
   
   var socket = io();
+  
+  // when video state changes
   function onPlayerStateChange(event) {
-	
     changeBorderColor(event.data);
+	console.log(event.data);
+
 	if(event.data == 1) {
 		console.log('video is playing'); //playing
 		socket.emit('play');
 	} else if(event.data == 2){
 		socket.emit('paused');
-  };
+	}
 	
-	
-  }
+}
   
   
-  // sync
-  $('#d').click(function() {
-			
-		var currentTime = player.getCurrentTime();
-		console.log(currentTime);
-		socket.emit('sync', currentTime);
-	});
-				
-		socket.on('sync', function(currentTime){
-			player.seekTo(currentTime);
-			console.log(currentTime);
-		});
-	/*
-	$('#load').click(function(){
-		socket.emit('load');
-		});
-		
-		socket.on('load', function(){
-			player.cueVideoById("njmCUJ94lUM", 5, "large");
-		});
-	*/	
   
 	
-	
-
-  
-
 </script>
 	
-	<script src="/socket.io/socket.io.js"></script>	<!-- load socket.io-client -->
-	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script>
 		$(function () { // wait until things are done loading to do stuff
 			var clicked = 'clicked';
-			var socket = io(); // new instance serve wiring up node and socket
+			//var socket = io(); // new instance serve wiring up node and socket
+			
+			//chat message capabilities
 			
 			$('#msg').submit(function(){ // when selector with form is submitted
 
@@ -155,6 +147,9 @@
 				
 			});
 			
+			
+			
+			
 			// get video ID
 			$('#vidID').submit(function(){
 				socket.emit('video id', $('#videoId').val());
@@ -162,12 +157,11 @@
 				return false;
 			});
 			socket.on('video id', function(vid){
-				console.log(vid);
-				player.cueVideoById(vid, 5, "large");
+				player.cueVideoById(vid, 0, "large");
 			});
 			
 			
-			// pause all vids
+			// pause all vids with the button
 			
 			$('#b').click(function(){
 				var currentTime = player.getCurrentTime();
@@ -180,27 +174,28 @@
 				console.log('paused');
 				});
 				
-			// play all videos
+			// play all videos with button
 			$('#c').click(function(){
 				socket.emit('play');
 				});
 			
 			socket.on('play', function(){
 				player.playVideo();
-				console.log('playing');
+				console.log('play button');
 				});	
+				
+			 // sync
+			$('#d').click(function() {
 			
-			//sync videos
-/*			$('#d').click(function(){
-			//
-				socket.emit('sync');
-				});
-				
-			socket.on('sync', function(){
-				console.log('syncing');
-				
+				var currentTime = player.getCurrentTime();
+				console.log(currentTime);
+				socket.emit('sync', currentTime);
 			});
-*/			
+						
+				socket.on('sync', function(currentTime){
+					player.seekTo(currentTime);
+					console.log(currentTime);
+				});
 			
 			
 		});
