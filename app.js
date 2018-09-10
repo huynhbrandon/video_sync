@@ -16,6 +16,7 @@ io.on('connection', function(socket){
 	
 	socket.on('chat message', function(msg){ // get msg from emit
 		console.log('chat message: ', msg);
+		// emit to all sockets connected to /
 		io.emit('chat message', msg + ' poop');		// broadcast to everyone, send to server
 	});
 	
