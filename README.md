@@ -2,6 +2,8 @@
 
 Watch a video with someone miles away in real time!
 
+#Disclaimer
+As of right now, only one room is available for this app so if users have already occupied the space to watch videos, you will have to wait. Working on implementing more rooms.
 
 How to use:
 1. Send the url of the app to someone (or open multiple browsers and enter the url!).
@@ -13,3 +15,5 @@ How to use:
     
     Video ID: QxyMf9deVLg <---- paste this into the loading form!
 5. Play the video and bask in modern technology!! 
+
+
